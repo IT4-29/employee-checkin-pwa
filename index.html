@@ -440,6 +440,8 @@
             data.latitude = parseFloat(data.latitude);
             data.longitude = parseFloat(data.longitude);
             
+            console.log('Sending data:', data);
+            
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="loading"></span>Processing...';
             
