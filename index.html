@@ -378,9 +378,14 @@
         window.addEventListener('online', syncOfflineData);
         
         function getCurrentLocation() {
+            console.log('Requesting location...');
             if (navigator.geolocation) {
+                locationStatus.className = 'location-status location-pending';
+                locationStatus.innerHTML = '<span class="loading"></span>Getting your location...';
+                
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
+                        console.log('Location success:', position.coords);
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
                         const accuracy = position.coords.accuracy;
@@ -394,16 +399,17 @@
                         submitBtn.disabled = false;
                     },
                     function(error) {
+                        console.log('Location error:', error.code, error.message);
                         let errorMessage = '';
                         switch(error.code) {
                             case error.PERMISSION_DENIED:
                                 errorMessage = "❌ Location access denied. Please enable location permissions.";
                                 break;
                             case error.POSITION_UNAVAILABLE:
-                                errorMessage = "❌ Location information unavailable.";
+                                errorMessage = "❌ Location information unavailable. Try moving closer to a window.";
                                 break;
                             case error.TIMEOUT:
-                                errorMessage = "❌ Location request timed out.";
+                                errorMessage = "❌ Location request timed out. Trying with less accuracy...";
                                 break;
                             default:
                                 errorMessage = "❌ An error occurred while retrieving location.";
@@ -413,11 +419,18 @@
                         locationStatus.className = 'location-status location-error';
                         locationStatus.innerHTML = errorMessage;
                         submitBtn.disabled = true;
+                        
+                        // If high accuracy failed, try with lower accuracy
+                        if (error.code === error.TIMEOUT || error.code === error.POSITION_UNAVAILABLE) {
+                            setTimeout(() => {
+                                tryLowAccuracyLocation();
+                            }, 2000);
+                        }
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 300000
+                        timeout: 15000,
+                        maximumAge: 60000
                     }
                 );
             } else {
@@ -425,6 +438,40 @@
                 locationStatus.innerHTML = "❌ Geolocation is not supported by this browser.";
                 submitBtn.disabled = true;
             }
+        }
+        
+        function tryLowAccuracyLocation() {
+            console.log('Trying low accuracy location...');
+            locationStatus.className = 'location-status location-pending';
+            locationStatus.innerHTML = '<span class="loading"></span>Trying low accuracy location...';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    console.log('Low accuracy location success:', position.coords);
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    latInput.value = lat;
+                    lngInput.value = lng;
+                    locationObtained = true;
+                    
+                    locationStatus.className = 'location-status location-success';
+                    locationStatus.innerHTML = `✅ Location obtained (±${Math.round(accuracy)}m accuracy - low precision)`;
+                    submitBtn.disabled = false;
+                },
+                function(error) {
+                    console.log('Low accuracy location also failed:', error);
+                    locationStatus.className = 'location-status location-error';
+                    locationStatus.innerHTML = "❌ Unable to get location. Please check device settings.";
+                    submitBtn.disabled = true;
+                },
+                {
+                    enableHighAccuracy: false,
+                    timeout: 30000,
+                    maximumAge: 300000
+                }
+            );
         }
         
         form.addEventListener('submit', async function(e) {
