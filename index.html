@@ -483,9 +483,29 @@
             }
             
             const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            data.latitude = parseFloat(data.latitude);
-            data.longitude = parseFloat(data.longitude);
+            const rawData = Object.fromEntries(formData);
+            
+            // Create clean data object with Thailand time
+            const now = new Date();
+            const thailandTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+            
+            const data = {
+                employee_id: rawData.employee_id || '',
+                action: rawData.action || '',
+                latitude: parseFloat(rawData.latitude) || 0,
+                longitude: parseFloat(rawData.longitude) || 0,
+                timestamp: thailandTime.toISOString(),
+                thailand_time: thailandTime.toLocaleString("en-US", {
+                    timeZone: "Asia/Bangkok",
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }),
+                location: `${parseFloat(rawData.latitude) || 0}, ${parseFloat(rawData.longitude) || 0}`
+            };
             
             console.log('Sending data:', data);
             
@@ -510,28 +530,34 @@
                     body: JSON.stringify(data)
                 });
                 
-                const result = await response.json();
+                console.log('Response status:', response.status);
                 
-                if (result.status === 'success') {
+                if (response.ok) {
+                    // Success - assume it worked if we got a 200 response
                     resultMessage.className = 'result-message result-success';
                     resultMessage.innerHTML = `
-                        ✅ ${result.message}<br>
-                        <small>Time: ${new Date(result.timestamp).toLocaleString()}<br>
-                        Location: ${result.location}</small>
+                        ✅ ${data.action === 'in' ? 'Check-in' : 'Check-out'} successful!<br>
+                        <small>Employee: ${data.employee_id}<br>
+                        Time: ${data.thailand_time}<br>
+                        Location: ${data.location}</small>
                     `;
                     form.reset();
+                    locationObtained = false;
                     setTimeout(() => {
                         getCurrentLocation();
                     }, 2000);
                 } else {
+                    // Try to get error message from response
+                    let errorText = 'Unknown error occurred';
+                    try {
+                        const result = await response.text();
+                        errorText = result || `HTTP ${response.status}`;
+                    } catch (e) {
+                        errorText = `HTTP ${response.status}`;
+                    }
+                    
                     resultMessage.className = 'result-message result-error';
-                    resultMessage.innerHTML = `
-                        ❌ ${result.message}<br>
-                        ${result.distance_to_nearest_office ? 
-                          `<small>Distance to nearest office: ${result.distance_to_nearest_office}m</small>` : 
-                          ''
-                        }
-                    `;
+                    resultMessage.innerHTML = `❌ ${errorText}`;
                 }
             } catch (error) {
                 // Save offline if network error
