@@ -3,7 +3,11 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Add any other static assets you want to cache
+  '/logo.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/icon-96.png',
+  '/favicon.png'
 ];
 
 // Install event - cache resources
