@@ -2,14 +2,14 @@
   "name": "Employee Check-in System",
   "short_name": "Check-in",
   "description": "Location-based employee check-in and check-out system",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#9966cc",
   "orientation": "portrait-primary",
   "categories": ["productivity", "business"],
   "lang": "en",
-  "scope": "/",
+  "scope": "./",
   "icons": [
     {
       "src": "icon-192.png",
@@ -27,7 +27,7 @@
       "name": "Quick Check In",
       "short_name": "Check In",
       "description": "Quick check-in at current location",
-      "url": "/?action=in",
+      "url": "./?action=in",
       "icons": [
         {
           "src": "icon-96.png",
@@ -40,7 +40,7 @@
       "name": "Quick Check Out",
       "short_name": "Check Out",
       "description": "Quick check-out at current location",
-      "url": "/?action=out",
+      "url": "./?action=out",
       "icons": [
         {
           "src": "icon-96.png",

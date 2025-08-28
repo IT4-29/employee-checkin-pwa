@@ -1,13 +1,13 @@
 const CACHE_NAME = 'employee-checkin-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/logo.png',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/icon-96.png',
-  '/favicon.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './logo.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-96.png',
+  './favicon.png'
 ];
 
 // Install event - cache resources
@@ -88,7 +88,7 @@ self.addEventListener('fetch', (event) => {
         .catch(() => {
           // If both cache and network fail, return offline page for navigation requests
           if (event.request.mode === 'navigate') {
-            return caches.match('/');
+            return caches.match('./');
           }
         })
     );
@@ -161,7 +161,7 @@ self.addEventListener('notificationclick', (event) => {
   if (event.action === 'checkin') {
     // Open the app with check-in pre-selected
     event.waitUntil(
-      clients.openWindow('/?action=in')
+      clients.openWindow('./?action=in')
     );
   } else if (event.action === 'dismiss') {
     // Just close the notification
@@ -169,7 +169,7 @@ self.addEventListener('notificationclick', (event) => {
   } else {
     // Default action - open the app
     event.waitUntil(
-      clients.openWindow('/')
+      clients.openWindow('./')
     );
   }
 });
